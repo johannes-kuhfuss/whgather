@@ -14,6 +14,7 @@ import (
 	"github.com/johannes-kuhfuss/services_utils/date"
 	"github.com/johannes-kuhfuss/services_utils/logger"
 	"github.com/johannes-kuhfuss/whgather/config"
+	"github.com/johannes-kuhfuss/whgather/handler"
 )
 
 var (
@@ -27,7 +28,7 @@ var (
 func StartApp() {
 	logger.Info("Starting application")
 
-	err := config.InitConfig(&cfg)
+	err := config.InitConfig(config.EnvFile, &cfg)
 	if err != nil {
 		panic(err)
 	}
@@ -41,8 +42,8 @@ func StartApp() {
 	<-appEnd
 	cleanUp()
 
-	if srvErr := server.Shutdown(ctx); srvErr != nil {
-		logger.Error("Graceful shutdown failed", srvErr)
+	if err := server.Shutdown(ctx); err != nil {
+		logger.Error("Graceful shutdown failed", err)
 	} else {
 		logger.Info("Graceful shutdown finished")
 	}
@@ -100,6 +101,7 @@ func wireApp() {
 }
 
 func mapUrls() {
+	cfg.RunTime.Router.GET("/ping", handler.PingHandler)
 }
 
 func RegisterForOsSignals() {
